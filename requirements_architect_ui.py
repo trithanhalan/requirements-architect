@@ -18,9 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import streamlit as st
 from requirements_architect import (
     get_available_providers,
-    call_ai_with_fallback,
-    TRANSCRIPT_DIRECTIVE,
-    REGULATION_DIRECTIVE,
+    generate_spec
 )
 from utils.ui import inject_css, render_header
 
@@ -271,13 +269,9 @@ with col2:
     if st.button("🚀  Generate Spec", type="primary", use_container_width=True, disabled=(not can_generate)):
         if input_text:
             is_regulation = mode == "📜 Regulatory Document"
-            directive = REGULATION_DIRECTIVE if is_regulation else TRANSCRIPT_DIRECTIVE
-            input_label = "regulatory document" if is_regulation else "stakeholder transcript"
-
             with st.spinner("🧠 Analyzing and architecting requirements..."):
                 try:
-                    user_prompt = f"Here is the raw {input_label}:\n\n{input_text}"
-                    result = call_ai_with_fallback(providers, directive, user_prompt)
+                    result = generate_spec(input_text, is_regulation=is_regulation, providers=providers)
                     if result:
                         st.session_state.result = result
                 except SystemExit:

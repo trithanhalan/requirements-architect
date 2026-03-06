@@ -219,7 +219,26 @@ def call_ai_with_fallback(providers, system_prompt, user_input):
 
 
 # ──────────────────────────────────────────────
-# Main
+# Engine API
+# ──────────────────────────────────────────────
+
+def generate_spec(content: str, is_regulation: bool = False, providers: list = None) -> str:
+    """Core logic engine for transforming raw text into a structured spec.
+    Cleanly decouples LLM generation from UI frameworks, allowing easy integration
+    with Bolt.new Next.js frontends, FastAPI endpoints, or Pica MCP servers.
+    """
+    if not providers:
+        providers = get_available_providers()
+        
+    directive = REGULATION_DIRECTIVE if is_regulation else TRANSCRIPT_DIRECTIVE
+    input_label = "regulatory document" if is_regulation else "stakeholder transcript"
+    user_prompt = f"Here is the raw {input_label}:\n\n{content}"
+    
+    return call_ai_with_fallback(providers, directive, user_prompt)
+
+
+# ──────────────────────────────────────────────
+# Main CLI
 # ──────────────────────────────────────────────
 
 def main():
@@ -253,10 +272,9 @@ def main():
     print(f"📋 Mode: {mode}")
     print(f"🚀 Architecting requirements...\n")
 
-    # Discover providers & call with fallback
+    # Parse and generate spec via the core engine
     providers = get_available_providers()
-    user_prompt = f"Here is the raw {'regulatory document' if args.regulation else 'stakeholder transcript'}:\n\n{content}"
-    result = call_ai_with_fallback(providers, directive, user_prompt)
+    result = generate_spec(content, is_regulation=args.regulation, providers=providers)
 
     # Write output
     if result:
