@@ -22,6 +22,7 @@ from requirements_architect import (
     TRANSCRIPT_DIRECTIVE,
     REGULATION_DIRECTIVE,
 )
+from utils.ui import inject_css, render_header
 
 # ── Page Config ──
 st.set_page_config(
@@ -31,13 +32,11 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Theme State ──
-if "theme" not in st.session_state:
-    st.session_state.theme = "dark"
+inject_css()
+
+# ── State ──
 if "result" not in st.session_state:
     st.session_state.result = None
-
-is_dark = st.session_state.theme == "dark"
 
 
 # ─────────────────────────────────────
@@ -165,280 +164,13 @@ def to_docx(md_text):
 
 
 # ─────────────────────────────────────
-# CSS — Wealthsimple Brand
-# ─────────────────────────────────────
-
-# Color Psychology:
-# Dune (#32302F): Stability, professionalism, luxury — Wealthsimple's signature
-# Gold (#D4A843): Confidence, premium value, call-to-action warmth
-# Green (#2D8C5A): Growth, financial health, success
-# Warm Gray (#8A8886): Secondary text — approachable, not sterile
-# Off-white (#FAF9F7): Wealthsimple's actual background tone
-
-DARK_CSS = """
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-    :root {
-        --ws-dune: #32302F;
-        --ws-gold: #D4A843;
-        --ws-green: #2D8C5A;
-        --ws-warm-gray: #8A8886;
-        --ws-bg-dark: #1C1B1A;
-        --ws-bg-card: #262524;
-        --ws-text-primary: #F5F3F0;
-        --ws-text-secondary: #B8B5B0;
-        --ws-border: rgba(245, 243, 240, 0.08);
-    }
-
-    .stApp {
-        background: var(--ws-bg-dark);
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    .main .block-container { max-width: 1400px; padding-top: 2rem; }
-
-    /* Typography */
-    h1 { color: var(--ws-text-primary) !important; font-weight: 700 !important; letter-spacing: -0.5px; }
-    h2 { color: var(--ws-text-primary) !important; font-weight: 600 !important; font-size: 1.3rem !important; }
-    h3 { color: var(--ws-text-secondary) !important; font-weight: 500 !important; }
-    p, li, span, div, label { color: var(--ws-text-primary) !important; }
-    .stMarkdown p { color: var(--ws-text-primary) !important; line-height: 1.75; font-size: 0.95rem; }
-    .stMarkdown li { color: var(--ws-text-primary) !important; line-height: 1.7; }
-
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: #201F1E;
-        border-right: 1px solid var(--ws-border);
-    }
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] li,
-    section[data-testid="stSidebar"] span,
-    section[data-testid="stSidebar"] label { color: var(--ws-text-secondary) !important; }
-    section[data-testid="stSidebar"] strong { color: var(--ws-gold) !important; }
-
-    /* Inputs — HIGH CONTRAST */
-    textarea, input[type="text"] {
-        background: var(--ws-bg-card) !important;
-        color: var(--ws-text-primary) !important;
-        border: 1px solid rgba(245, 243, 240, 0.12) !important;
-        border-radius: 8px !important;
-        font-family: 'Inter', monospace !important;
-        font-size: 0.9rem !important;
-        caret-color: var(--ws-gold) !important;
-    }
-    textarea::placeholder { color: var(--ws-warm-gray) !important; }
-    textarea:focus { border-color: var(--ws-gold) !important; }
-
-    /* Tabs */
-    .stTabs [data-baseweb="tab-list"] { gap: 2px; background: transparent; border-bottom: 1px solid var(--ws-border); }
-    .stTabs [data-baseweb="tab"] {
-        background: transparent;
-        color: var(--ws-text-secondary) !important;
-        padding: 10px 20px;
-        border: none;
-        border-bottom: 2px solid transparent;
-    }
-    .stTabs [aria-selected="true"] {
-        color: var(--ws-gold) !important;
-        border-bottom: 2px solid var(--ws-gold) !important;
-        background: transparent !important;
-    }
-
-    /* Primary Button — Gold CTA */
-    .stButton > button[kind="primary"] {
-        background: var(--ws-gold) !important;
-        color: var(--ws-bg-dark) !important;
-        font-weight: 600 !important;
-        border: none !important;
-        border-radius: 8px !important;
-        padding: 0.7rem 1.5rem !important;
-        transition: all 0.2s ease !important;
-        font-size: 0.95rem !important;
-    }
-    .stButton > button[kind="primary"]:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 16px rgba(212, 168, 67, 0.3);
-        filter: brightness(1.1);
-    }
-
-    /* Secondary Buttons */
-    .stButton > button:not([kind="primary"]) {
-        border-radius: 8px !important;
-        border: 1px solid rgba(245, 243, 240, 0.12) !important;
-        color: var(--ws-text-primary) !important;
-        background: var(--ws-bg-card) !important;
-        transition: all 0.15s ease !important;
-    }
-    .stButton > button:not([kind="primary"]):hover {
-        border-color: var(--ws-gold) !important;
-        color: var(--ws-gold) !important;
-    }
-
-    /* Download Buttons */
-    .stDownloadButton > button {
-        border-radius: 8px !important;
-        border: 1px solid rgba(245, 243, 240, 0.12) !important;
-        color: var(--ws-text-primary) !important;
-        background: var(--ws-bg-card) !important;
-    }
-    .stDownloadButton > button:hover {
-        border-color: var(--ws-gold) !important;
-    }
-
-    /* Code blocks */
-    code { background: rgba(212, 168, 67, 0.1) !important; color: var(--ws-gold) !important; padding: 2px 6px; border-radius: 4px; }
-    pre { background: #161514 !important; border: 1px solid var(--ws-border) !important; border-radius: 8px !important; }
-    pre code { color: var(--ws-text-primary) !important; background: transparent !important; }
-
-    /* File uploader */
-    [data-testid="stFileUploader"] { border: 1px dashed rgba(212, 168, 67, 0.25) !important; border-radius: 8px; }
-
-    /* Alerts */
-    .stSuccess { background: rgba(45, 140, 90, 0.12) !important; border-left: 3px solid var(--ws-green) !important; }
-    .stInfo { background: rgba(212, 168, 67, 0.08) !important; border-left: 3px solid var(--ws-gold) !important; }
-    .stError { background: rgba(220, 60, 60, 0.1) !important; border-left: 3px solid #dc3c3c !important; }
-
-    hr { border-color: var(--ws-border) !important; }
-
-    /* Generated output section */
-    .output-header { 
-        background: linear-gradient(135deg, var(--ws-bg-card) 0%, #2a2928 100%);
-        border: 1px solid var(--ws-border);
-        border-radius: 12px;
-        padding: 1.2rem 1.5rem;
-        margin-bottom: 1rem;
-    }
-
-    /* Radio buttons */
-    .stRadio [role="radiogroup"] label { color: var(--ws-text-primary) !important; }
-</style>
-"""
-
-LIGHT_CSS = """
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-    :root {
-        --ws-dune: #32302F;
-        --ws-gold: #B8912E;
-        --ws-green: #2D8C5A;
-        --ws-warm-gray: #8A8886;
-        --ws-bg-light: #FAF9F7;
-        --ws-bg-card: #FFFFFF;
-        --ws-text-primary: #32302F;
-        --ws-text-secondary: #5C5A57;
-        --ws-border: rgba(50, 48, 47, 0.1);
-    }
-
-    .stApp {
-        background: var(--ws-bg-light);
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    .main .block-container { max-width: 1400px; padding-top: 2rem; }
-
-    h1 { color: var(--ws-dune) !important; font-weight: 700 !important; letter-spacing: -0.5px; }
-    h2 { color: var(--ws-dune) !important; font-weight: 600 !important; font-size: 1.3rem !important; }
-    h3 { color: var(--ws-text-secondary) !important; font-weight: 500 !important; }
-    p, li, span, div, label { color: var(--ws-text-primary) !important; }
-    .stMarkdown p { color: var(--ws-text-primary) !important; line-height: 1.75; font-size: 0.95rem; }
-    .stMarkdown li { color: var(--ws-text-primary) !important; line-height: 1.7; }
-
-    section[data-testid="stSidebar"] {
-        background: #FFFFFF;
-        border-right: 1px solid var(--ws-border);
-    }
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] li,
-    section[data-testid="stSidebar"] span,
-    section[data-testid="stSidebar"] label { color: var(--ws-text-secondary) !important; }
-    section[data-testid="stSidebar"] strong { color: var(--ws-gold) !important; }
-
-    textarea, input[type="text"] {
-        background: #FFFFFF !important;
-        color: var(--ws-text-primary) !important;
-        border: 1px solid #D5D3D0 !important;
-        border-radius: 8px !important;
-        font-family: 'Inter', monospace !important;
-        font-size: 0.9rem !important;
-    }
-    textarea:focus { border-color: var(--ws-gold) !important; }
-
-    .stTabs [data-baseweb="tab-list"] { gap: 2px; background: transparent; border-bottom: 1px solid var(--ws-border); }
-    .stTabs [data-baseweb="tab"] {
-        background: transparent;
-        color: var(--ws-text-secondary) !important;
-        padding: 10px 20px;
-        border: none;
-        border-bottom: 2px solid transparent;
-    }
-    .stTabs [aria-selected="true"] {
-        color: var(--ws-gold) !important;
-        border-bottom: 2px solid var(--ws-gold) !important;
-        background: transparent !important;
-    }
-
-    .stButton > button[kind="primary"] {
-        background: var(--ws-dune) !important;
-        color: #FFFFFF !important;
-        font-weight: 600 !important;
-        border: none !important;
-        border-radius: 8px !important;
-        padding: 0.7rem 1.5rem !important;
-        transition: all 0.2s ease !important;
-    }
-    .stButton > button[kind="primary"]:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 16px rgba(50, 48, 47, 0.2);
-    }
-
-    .stButton > button:not([kind="primary"]) {
-        border-radius: 8px !important;
-        border: 1px solid #D5D3D0 !important;
-        color: var(--ws-text-primary) !important;
-        background: #FFFFFF !important;
-    }
-    .stButton > button:not([kind="primary"]):hover {
-        border-color: var(--ws-gold) !important;
-    }
-
-    .stDownloadButton > button {
-        border-radius: 8px !important;
-        border: 1px solid #D5D3D0 !important;
-        color: var(--ws-text-primary) !important;
-        background: #FFFFFF !important;
-    }
-
-    code { background: rgba(50, 48, 47, 0.06) !important; color: var(--ws-dune) !important; }
-    pre { background: var(--ws-dune) !important; border-radius: 8px !important; }
-    pre code { color: #F5F3F0 !important; background: transparent !important; }
-
-    .stSuccess { background: rgba(45, 140, 90, 0.06) !important; border-left: 3px solid var(--ws-green) !important; }
-    .stInfo { background: rgba(50, 48, 47, 0.04) !important; border-left: 3px solid var(--ws-warm-gray) !important; }
-
-    hr { border-color: var(--ws-border) !important; }
-
-    .stRadio [role="radiogroup"] label { color: var(--ws-text-primary) !important; }
-</style>
-"""
-
-# Apply theme
-st.markdown(DARK_CSS if is_dark else LIGHT_CSS, unsafe_allow_html=True)
-
-
-# ─────────────────────────────────────
 # Sidebar
 # ─────────────────────────────────────
 
 with st.sidebar:
     st.markdown("### ⚙️ Configuration")
 
-    # Theme toggle
-    theme_label = "☀️ Switch to Light" if is_dark else "🌙 Switch to Dark"
-    if st.button(theme_label, use_container_width=True):
-        st.session_state.theme = "light" if is_dark else "dark"
-        st.rerun()
-
-    st.markdown("---")
+    st.markdown("### ⚙️ Configuration")
 
     mode = st.radio(
         "**Input Mode**",
@@ -473,9 +205,10 @@ with st.sidebar:
 # Header
 # ─────────────────────────────────────
 
-st.markdown("# 🏗️ Requirements Architect")
-st.markdown("*From stakeholder chaos to production-ready specs — in minutes, not weeks.*")
-st.markdown("---")
+render_header(
+    title="Requirements Architect",
+    description="From stakeholder chaos to production-ready specs — in minutes, not weeks."
+)
 
 
 # ─────────────────────────────────────
@@ -604,14 +337,12 @@ with col2:
 
 # ── Footer ──
 st.markdown("---")
-accent = "#D4A843" if is_dark else "#32302F"
-text_col = "#8A8886" if is_dark else "#5C5A57"
-st.markdown(f"""
+st.markdown("""
 <div style="text-align:center; padding:1.5rem 0;">
-    <p style="color:{text_col} !important; font-size:0.85rem; margin:0;">
-        <strong style="color:{accent} !important;">Requirements Architect v1.0</strong>
+    <p style="color:#A1A1AA !important; font-size:0.85rem; margin:0;">
+        <strong style="color:#00FFAA !important;">Requirements Architect v1.0</strong>
     </p>
-    <p style="color:{text_col} !important; font-size:0.8rem; margin:4px 0 0 0;">
+    <p style="color:#A1A1AA !important; font-size:0.8rem; margin:4px 0 0 0;">
         Directive → Orchestration → Execution · Built for AI Builders
     </p>
 </div>
