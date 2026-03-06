@@ -1,0 +1,7 @@
+streamlit
+anthropic
+openai
+google-generativeai
+python-dotenv
+reportlab
+python-docx
