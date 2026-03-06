@@ -26,22 +26,31 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 # ──────────────────────────────────────────────
 
 def get_available_providers():
-    """Discover all available AI providers from .env keys.
+    """Discover all available AI providers from secrets or .env.
     Returns list of (provider_name, api_key) tuples.
-    Checks Anthropic first (best quality), then OpenAI, then Gemini.
-    Skips placeholder keys like 'your_key_here'.
+    Checks Anthropic first, then OpenAI, then Gemini.
     """
     providers = []
+    
+    # Helper to check both Streamlit secrets and os.getenv
+    def get_key(name):
+        try:
+            import streamlit as st
+            if name in st.secrets:
+                return st.secrets[name]
+        except Exception:
+            pass
+        return os.getenv(name, "")
 
-    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    api_key = get_key("ANTHROPIC_API_KEY")
     if api_key and not api_key.startswith("your_"):
         providers.append(("anthropic", api_key))
 
-    api_key = os.getenv("OPENAI_API_KEY", "")
+    api_key = get_key("OPENAI_API_KEY")
     if api_key and not api_key.startswith("your_"):
         providers.append(("openai", api_key))
 
-    api_key = os.getenv("GOOGLE_API_KEY", "") or os.getenv("GEMINI_API_KEY", "")
+    api_key = get_key("GOOGLE_API_KEY") or get_key("GEMINI_API_KEY")
     if api_key and not api_key.startswith("your_"):
         providers.append(("gemini", api_key))
 

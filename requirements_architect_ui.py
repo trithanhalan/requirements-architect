@@ -170,8 +170,6 @@ def to_docx(md_text):
 with st.sidebar:
     st.markdown("### ⚙️ Configuration")
 
-    st.markdown("### ⚙️ Configuration")
-
     mode = st.radio(
         "**Input Mode**",
         ["📝 Stakeholder Transcript", "📜 Regulatory Document"],
